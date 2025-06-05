@@ -1,4 +1,4 @@
-package com.backend.wypt.Security;
+package com.backend.ConfigSecurity;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -23,15 +23,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private static final List<String> ALLOWED_ORIGINS = List.of(
-            "http://localhost:3000"
-            // https 프론트나 다른 서버 작성
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://localhost:8080"
     );
 
     // API endponit 허용할거 작성.
     public static final String[] PERMIT_URLS = {
+            // 기본/Swagger
             "/error",
             "/favicon.ico",
-            "/v1/auth/test",
             "/v3/api-docs",
             "/swagger-ui/index.html",
             "/swagger-ui/**",
@@ -39,6 +40,14 @@ public class SecurityConfig {
             "/swagger-resources/**",
             "/swagger-ui.html",
             "/webjars/**",
+
+            // Auth
+            "/v1/auth/test",
+            "/v1/auth/login",
+            "/v1/auth/register",
+            "/v1/auth/send-verification-code",
+            "/v1/auth/verify-code",
+            "/v1/auth/reset-password",
     };
 
     @Bean
@@ -47,10 +56,9 @@ public class SecurityConfig {
     }
 
     /*
-    * 2025/04/13 - CORS, JWT, form login 비활성화
-    * 1. 로그인은 했지만 권한 부족(예: 403 Forbidden)인 경우 응답을 커스터마이징
-    * 2. OAuth2 로그인 연동(FE 와 상의필요)
-    * */
+     * 1. 로그인은 했지만 권한 부족(예: 403 Forbidden)인 경우 응답을 커스터마이징
+     * 2. OAuth2 로그인 연동(FE 와 상의필요)
+     * */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
         http
@@ -101,3 +109,4 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 }
+

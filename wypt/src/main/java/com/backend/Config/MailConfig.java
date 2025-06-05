@@ -1,4 +1,4 @@
-package com.backend.wypt.Config;
+package com.backend.Config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -42,4 +42,5 @@ public class MailConfig {
         return mailSender;
     }
 }
+
 

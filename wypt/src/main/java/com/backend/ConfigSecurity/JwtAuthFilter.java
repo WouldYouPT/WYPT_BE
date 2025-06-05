@@ -1,28 +1,26 @@
-package com.backend.wypt.Security;
+package com.backend.ConfigSecurity;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
+import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
+@AllArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter{
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserDetailsService userDetailsService;
-
-    public JwtAuthFilter(JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService) {
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.userDetailsService = userDetailsService;
-    }
+    private final CustomUserDetailsService userDetailsService;
 
     // 로그인, 회원가입, OAuth 콜백 등은JWT 인증 없이 접근 가능해야 한다.
     @Override
@@ -37,42 +35,55 @@ public class JwtAuthFilter extends OncePerRequestFilter{
                 path.startsWith("/auth/success");
     }
 
+    // Spring이 자동으로 호출하는 Filter. SecurityConfig에 등록해서 씀
     // 요청마다 JWT 토큰을 꺼내서 검증하고, 인증 객체(SecurityContext)에 등록함.
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 1. Request 헤더에서 토큰 추출
         String token = jwtTokenProvider.resolveToken(request);
 
         if (token != null) {
             try {
-                if (!jwtTokenProvider.validateToken(token)) { // 만료 시간이 20분 이하일 경우 새로운 토큰 발급
-                    Integer userId = jwtTokenProvider.getIdFromToken(token);
-                    String newToken = jwtTokenProvider.createToken(userId);
+                if (!jwtTokenProvider.validateToken(token)) {
+                    Long userId = jwtTokenProvider.getIdFromToken(token);
+                    String userType = jwtTokenProvider.getTypeFromToken(token);
+                    String newToken = jwtTokenProvider.createToken(userId, userType);
                     response.setHeader("Authorization", "Bearer " + newToken);
                     token = newToken;
                 }
 
-                Integer userId = jwtTokenProvider.getIdFromToken(token);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(String.valueOf(userId));
+                Long userId = jwtTokenProvider.getIdFromToken(token);
+                String userType = jwtTokenProvider.getTypeFromToken(token);
 
+                UserDetails userDetails;
+                userDetails = userDetailsService.loadUserByUsername(String.valueOf(userId));
+
+                // 4) 권한 리스트 생성 ("Manager" 또는 "User")
+                List<GrantedAuthority> authorities;
+                if ("manager".equals(userType)) {
+                    authorities = List.of(new SimpleGrantedAuthority("Manager"));
+                } else if("admin".equals(userType)){
+                    authorities = List.of(new SimpleGrantedAuthority("Admin"));
+                } else {
+                    authorities = List.of(new SimpleGrantedAuthority("User"));
+                }
+
+                // 5) Authentication 객체 생성 및 SecurityContext에 등록
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
+                        new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+
             } catch (ExpiredJwtException e) {
-                // 토큰이 아예 만료된 경우 → 401 응답 반환
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("{\"message\": \"세션이 만료되었습니다. 다시 로그인하세요.\"}");
                 return;
             }
         }
 
-        // 다음 필터(혹은 컨트롤러)로 요청 전달
         filterChain.doFilter(request, response);
     }
 
 }
+
 
