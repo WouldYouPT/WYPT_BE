@@ -30,7 +30,7 @@ public class Trainer {
     @Column(name = "phone_number", length = 20)
     private String phoneNumber;
 
-    @Column(name = "kakao_id", length = 30)
+    @Column(name = "kakao_id", length = 30, unique = true)
     private String kakaoId;
 
     @CreationTimestamp

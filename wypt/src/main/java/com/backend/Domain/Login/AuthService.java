@@ -3,16 +3,20 @@ package com.backend.Domain.Login;
 import com.backend.ConfigSecurity.JwtTokenProvider;
 import com.backend.ConfigSecurity.RefreshToken.RefreshToken;
 import com.backend.ConfigSecurity.RefreshToken.RefreshTokenService;
+import com.backend.Domain.Login.Dto.LoginResponseDto;
+import com.backend.Domain.Login.Dto.RegisterRequestDto;
 import com.backend.Domain.Trainer.Trainer;
 import com.backend.Domain.Trainer.TrainerRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.transaction.Transactional;
 import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -70,12 +74,12 @@ public class AuthService {
         }
 
         //visitLogService.logVisit(user.getId());
-        String token = jwtTokenProvider.createToken(trainer.getId(), "user");
-        String refreshToken = jwtTokenProvider.createRefreshToken(trainer.getId(), "user");
+        String token = jwtTokenProvider.createToken(trainer.getId(), "trainer");
+        String refreshToken = jwtTokenProvider.createRefreshToken(trainer.getId(), "trainer");
 
         LocalDateTime expiryDate = LocalDateTime.now().plusDays(3);
         refreshTokenService.saveOrUpdateToken(trainer, refreshToken, expiryDate);
-        return new LoginResponseDto(token, "user");
+        return new LoginResponseDto(token, "trainer");
     }
 
     public String reissueAccessToken(String refreshTokenValue) {
@@ -151,5 +155,8 @@ public class AuthService {
         trainer.setPassword(passwordEncoder.encode(newPassword));
         trainerRepository.save(trainer);
     }
+
+
+
 }
 
