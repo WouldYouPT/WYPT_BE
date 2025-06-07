@@ -1,8 +1,7 @@
-// src/App.js
-import React from 'react';
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage from './LoginPage';
-import OAuth2RedirectHandler from './OAuth2RedirectHandler';
+import LoginPage from './components/LoginPage';
+import Dashboard from './components/Dashboard';
 
 export default function App() {
   const isLoggedIn = !!localStorage.getItem('jwtToken');
@@ -14,20 +13,12 @@ export default function App() {
           path="/login"
           element={isLoggedIn ? <Navigate to="/" replace /> : <LoginPage />}
         />
-        <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
         <Route
           path="/"
           element={
-            isLoggedIn ? (
-              <div style={{ textAlign: 'center', marginTop: '100px' }}>
-                <h2>이미 로그인 상태입니다</h2>
-                <p>
-                  저장된 JWT: <code style={{ wordBreak: 'break-all' }}>{localStorage.getItem('jwtToken')}</code>
-                </p>
-              </div>
-            ) : (
-              <Navigate to="/login" replace />
-            )
+            isLoggedIn
+              ? <Dashboard />
+              : <Navigate to="/login" replace />
           }
         />
         <Route
@@ -38,3 +29,4 @@ export default function App() {
     </Router>
   );
 }
+

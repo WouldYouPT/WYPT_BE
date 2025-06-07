@@ -1,7 +1,5 @@
 package com.backend.ConfigSecurity;
 
-import com.backend.Domain.Login.CustomOAuth2UserService;
-import com.backend.Domain.Login.OAuth2AuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,6 +51,7 @@ public class SecurityConfig {
             "/v1/auth/reset-password",
 
             "/oauth2/**",
+            "/v1/auth/social/**",
     };
 
     @Bean
@@ -60,13 +59,8 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    /*
-     * 1. 로그인은 했지만 권한 부족(예: 403 Forbidden)인 경우 응답을 커스터마이징
-     * 2. OAuth2 로그인 연동(FE 와 상의필요)
-     * */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter,
-            CustomOAuth2UserService customOAuth2UserService, OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -75,22 +69,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PERMIT_URLS).permitAll()
                         .anyRequest().authenticated()
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        // “로그인 시작” 엔드포인트: /oauth2/authorization/{registrationId}
-                        .authorizationEndpoint(authorization -> authorization
-                                .baseUri("/oauth2/authorization")
-                        )
-                        // “카카오(인가 코드)->콜백” 엔드포인트: /oauth2/callback/{registrationId}
-                        .redirectionEndpoint(redir -> redir
-                                .baseUri("/oauth2/callback/*")
-                        )
-                        // CustomOAuth2UserService: 카카오에서 받은 User 정보 DB 처리
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
-                        )
-                        // 로그인 성공 시 JWT 생성 후 리다이렉트 등 추가 로직
-                        .successHandler(oAuth2AuthenticationSuccessHandler)
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exception -> exception

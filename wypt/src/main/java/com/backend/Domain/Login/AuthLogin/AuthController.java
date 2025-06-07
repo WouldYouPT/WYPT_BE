@@ -1,4 +1,4 @@
-package com.backend.Domain.Login;
+package com.backend.Domain.Login.AuthLogin;
 
 import com.backend.Domain.Login.Dto.LoginRequestDto;
 import com.backend.Domain.Login.Dto.LoginResponseDto;

@@ -1,4 +1,4 @@
-package com.backend.Domain.Login;
+package com.backend.Domain.Login.AuthLogin;
 
 import com.backend.ConfigSecurity.JwtTokenProvider;
 import com.backend.ConfigSecurity.RefreshToken.RefreshToken;
@@ -9,16 +9,13 @@ import com.backend.Domain.Trainer.Trainer;
 import com.backend.Domain.Trainer.TrainerRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.transaction.Transactional;
 import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;

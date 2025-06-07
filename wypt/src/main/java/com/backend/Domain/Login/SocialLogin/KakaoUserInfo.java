@@ -1,4 +1,4 @@
-package com.backend.Domain.Login;
+package com.backend.Domain.Login.SocialLogin;
 
 import java.util.Map;
 import lombok.Getter;
