@@ -96,15 +96,29 @@ CREATE TABLE Schedule (
 ) ENGINE=InnoDB;
 
 
+
 -- 트레이너가 등록한 운동 목록
-CREATE TABLE Exercise (
-    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
-    trainer_id  BIGINT NOT NULL,
-    ex_name     VARCHAR(50) NOT NULL,
-    category    VARCHAR(50),       # 상체, 하체, 유산소, 스트레칭 등
-    description VARCHAR(300),
+CREATE TABLE GlobalExercise (
+    id                     BIGINT AUTO_INCREMENT PRIMARY KEY,
+    ex_name                VARCHAR(50)  NOT NULL,    -- 운동 이름
+    category               VARCHAR(50),              -- 상체·하체·유산소 등
+    description            VARCHAR(300),             -- 설명
+    trainer_id             BIGINT NOT NULL DEFAULT 0,    -- 0: 시스템 사전, 1이상 : 트레이너가 추가
+    created_at             DATETIME    DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (trainer_id) REFERENCES Trainer(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- 트레이너가 템플릿으로 사용
+CREATE TABLE ExerciseTemplate (
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    trainer_id   BIGINT      NOT NULL,             -- 템플릿 생성자
+    tp_name      VARCHAR(50) NOT NULL,             -- 템플릿 이름
+    description  VARCHAR(200),                     -- (선택) 템플릿 설명
+    exercises    JSON         NOT NULL,            -- 운동 리스트 JSON 배열 (최대 15개)
+    created_at   DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (trainer_id) REFERENCES Trainer(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 
 -- 수업에 사용된 운동 목록
 CREATE TABLE ScheduleExercise (
@@ -115,7 +129,7 @@ CREATE TABLE ScheduleExercise (
     sets          VARCHAR(20),
     weight        VARCHAR(20),
     FOREIGN KEY (schedule_id) REFERENCES Schedule(id) ON DELETE CASCADE,
-    FOREIGN KEY (exercise_id) REFERENCES Exercise(id) ON DELETE CASCADE
+    FOREIGN KEY (exercise_id) REFERENCES GlobalExercise(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 

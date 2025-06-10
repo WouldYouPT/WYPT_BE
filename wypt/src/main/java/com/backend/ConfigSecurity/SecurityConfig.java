@@ -52,6 +52,9 @@ public class SecurityConfig {
 
             "/oauth2/**",
             "/v1/auth/social/**",
+
+            // 카카오 웺훅
+            "/api/kakao/webhook",
     };
 
     @Bean

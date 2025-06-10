@@ -1,16 +1,11 @@
-USE WYPT;
+USE wouldyoupt;
 
-INSERT INTO customer (kakao_user_id, name, created_at) VALUES
-    ('kakao_user_1', '홍길동', NOW()),
-    ('kakao_user_2', '김영희', NOW()),
-    ('kakao_user_3', '이철수', NOW());
+-- 1) 샘플 트레이너 한 명 :contentReference[oaicite:5]{index=5}
+INSERT INTO Trainer (name, email, password, phone_number, kakao_id)
+VALUES
+    ('트레이너1', 'trainer1@test.com', '$2a$10$VuPfJJPhJdkwMYV.aZIKjeFKxrYHBnqmfldMVDLyD9Y9yI/l4foGG', '010-1234-5678', NULL);
 
-INSERT INTO trainer (name, specialty, created_at) VALUES
-    ('트레이너1', '근력 강화', NOW()),
-    ('트레이너2', '요가',       NOW()),
-    ('트레이너3', '필라테스',   NOW());
-
-INSERT INTO chat_room (customer_id, trainer_id, created_at) VALUES
-    (1, 1, NOW()),
-    (2, 2, NOW()),
-    (3, 3, NOW());
+-- 2) 샘플 회원 한 명 (성문님 카카오톡 계정: 4294058556) :contentReference[oaicite:6]{index=6}
+INSERT INTO Member (trainer_id, name, phone_number, kakao_id, pt_count, used_pt)
+VALUES
+    (1, '성문', '010-2401-3487', '4294058556', 0, 0);
